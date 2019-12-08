@@ -1,1 +1,1 @@
-A command-line tool for using the Eloquent ORM with any database.
+A command-line tool for using the Doctrine ORM for commonly performed tasks.
