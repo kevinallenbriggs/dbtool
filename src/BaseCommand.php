@@ -2,9 +2,7 @@
 
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\OutputInterface;
-
 
 abstract class BaseCommand extends Command
 {
@@ -33,27 +31,17 @@ abstract class BaseCommand extends Command
      */
     protected $driver;
 
-
-    /**
-     * Provides an output interface outside of the execute() method.
-     *
-     * @var \Symfony\Component\Console\Output\ConsoleOutput
-     */
-    protected $output;
-
-
     /**
      * Creates a new BaseCommand object.  Must call the parent constructor last.
-     * 
+     *
      * @see https://symfony.com/doc/4.4/console.html#creating-a-command
      */
     public function __construct()
     {
-        $this->output = new ConsoleOutput();
         $this->driver = $this->get_pdo_driver();
 
         // get the connection dsn
-        $this->dsn = $this->driver === BaseCommand::SQLITE_DRIVER ? 
+        $this->dsn = $this->driver === BaseCommand::SQLITE_DRIVER ?
             $this->create_sqlite_dsn() :
             $this->create_mysql_dsn();
 
@@ -61,7 +49,7 @@ abstract class BaseCommand extends Command
 
         parent::__construct();
     }
-    
+
     /**
      * Configures the command.
      *
@@ -92,15 +80,15 @@ abstract class BaseCommand extends Command
     protected function get_pdo_driver() :string
     {
         if (!key_exists('DB_DRIVER', $_ENV)) {
-            $this->output->writeln("<error>You must supply a database driver in your .env file.</error>");
-            exit();
+            OutputHelper::error(
+                "You must supply a database driver in your .env file."
+            );
         }
 
         $driver = $_ENV['DB_DRIVER'];
 
         if (!in_array($driver, PDO::getAvailableDrivers())) {
-            $this->output->writeln("<error>No {$driver} driver available.</error>");
-            exit;
+            OutputHelper::error("No driver for {$driver} is available.");
         }
 
         return $driver;
@@ -115,8 +103,7 @@ abstract class BaseCommand extends Command
     protected function create_sqlite_dsn() :string
     {
         if (!key_exists('DB_PATH', $_ENV)) {
-            $this->output->writeln("<error>You must supply a database path in your .env file when using SQLite.</error>");
-            exit();
+            OutputHelper::error("You must supply a database path in your .env file when using SQLite.");
         }
 
         return sprintf('sqlite:%s', $_ENV['DB_PATH']);
@@ -124,15 +111,14 @@ abstract class BaseCommand extends Command
 
     /**
      * Creates and returns a dsn to use for mysql connections.
-     * 
+     *
      * https://www.php.net/manual/en/ref.pdo-mysql.connection.php
      * @return string
      */
     protected function create_mysql_dsn() :string
     {
         if (!key_exists('DB_HOST', $_ENV) || !key_exists('DB_NAME', $_ENV)) {
-            $this->output->writeln("<error>You must supply a database host and name in our .env file when using MySQL.</error>");
-            exit();
+            OutputHelper::error("You must supply a database host and name in our .env file when using MySQL.");
         }
 
         $dsn = sprintf(
@@ -148,13 +134,17 @@ abstract class BaseCommand extends Command
         return $dsn;
     }
 
+    /**
+     * Instantiates the PDO object as required by mysql or sqlite.
+     *
+     * @return \PDO
+     */
     protected function get_pdo_connection() :\PDO
     {
         // if using MySQL credentials must be included
         if ($this->driver === BaseCommand::MYSQL_DRIVER) {
             if (!key_exists('DB_USER', $_ENV) || !key_exists('DB_PASSWORD', $_ENV)) {
-                $this->output->writeln("<error>You must supply a database user and password in our .env file when using MySQL.</error>");
-                exit();
+                OutputHelper::error("You must supply a database user and password in our .env file when using MySQL.");
             }
 
             return new \PDO(
@@ -166,6 +156,5 @@ abstract class BaseCommand extends Command
 
         // sqlite only requires the dsn
         return new \PDO($this->dsn);
-
     }
 }
