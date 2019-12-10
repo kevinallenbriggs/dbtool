@@ -4,6 +4,7 @@ use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class TableDropCommand extends BaseCommand
@@ -30,19 +31,9 @@ class TableDropCommand extends BaseCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         // check if the table exists
-        $table_list_command = $this->getApplication()->find('table:list');
-        $list_command_arguments = new ArrayInput([
-            'command' => 'table:list',
-            
-        ]);
-        $stmt = $this->connection->prepare("INSERT INTO REGISTRY (name, value) VALUES (:name, :value)");
-        $stmt->bindParam(':name', $name);
-        $stmt->bindParam(':value', $value);
-
-        // insert one row
-        $name = 'one';
-        $value = 1;
-        $stmt->execute();
+        $stmt = $this->connection->prepare("SELECT 1 FROM :table LIMIT 1");
+        $stmt->bindValue(':table', $input->getArgument('table'));
+        dd($result = $stmt->execute());
 
         // check if a backup should be made && perform if so
 

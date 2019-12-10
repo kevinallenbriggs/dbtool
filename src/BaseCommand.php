@@ -9,7 +9,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 abstract class BaseCommand extends Command
 {
     const SQLITE_DRIVER = 'sqlite';
-
     const MYSQL_DRIVER = 'mysql';
 
      /**

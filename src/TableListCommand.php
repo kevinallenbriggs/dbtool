@@ -7,20 +7,30 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class TableListCommand extends BaseCommand
 {
+    /**
+     * The name of the command.
+     *
+     * @var string
+     */
     protected static $defaultName = 'table:list';
 
+    /**
+     * Configure the command.
+     *
+     * @return void
+     */
     protected function configure()
     {
         $this->setDescription('Lists all tables within the database.');
-
-        $this->addOption(
-            'show-engine',
-            null,
-            InputOption::VALUE_NONE,
-            'Displays the storage engine for each table.'
-        );
     }
 
+    /**
+     * Execute the command.
+     *
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @return void
+     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $query = $this->driver === $this::SQLITE_DRIVER ?
@@ -31,8 +41,8 @@ class TableListCommand extends BaseCommand
         $results = [];
 
         $table = new Table($output);
-        $table->setHeaders(['Tables']);
 
+        $table->setHeaders(['Tables']);
 
         while ($row = $stmt->fetch(PDO::FETCH_COLUMN)) {
             $table->addRow([$row]);
