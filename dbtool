@@ -3,15 +3,20 @@
 
 use Symfony\Component\Dotenv\Dotenv;
 use Symfony\Component\Console\Application;
+use Symfony\Component\Dotenv\Exception\PathException;
 
 // include the autoloader
 require __DIR__.'/vendor/autoload.php';
 
 // load the configuration
 $env = new Dotenv();
-$env->load(__DIR__ . '/.env');
+try {
+    $env->load(__DIR__ . '/.env');
+} catch (PathException $e) {
+    OutputHelper::error('Unable to locate .env file at ' . __DIR__);
+}
 
-$app = new Application();
+$app = new Application('DbTool', 1.0);
 
 $app->add(new TableDropCommand());
 $app->add(new TableListCommand());
