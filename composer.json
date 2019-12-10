@@ -4,7 +4,6 @@
     "type": "utility",
     "require": {
         "symfony/console": "^4",
-        "doctrine/orm": "^2.7",
         "symfony/dotenv": "^5.0"
     },
     "require-dev": {
